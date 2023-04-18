@@ -29,7 +29,7 @@ const TMP_FS = {
 };
 
 export const readFileSync = (path, opt) => {
-  return TMP_FS[path];
+  return TMP_FS[path.replace('.example', '')];
 }
 
 export const writeFile = (path, content, cb) => {
