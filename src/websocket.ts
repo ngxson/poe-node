@@ -1,6 +1,6 @@
 import WebSocket from 'ws';
 import * as diff from 'diff';
-import {readFileSync} from "fs";
+import { readFileSync } from "./_storage";
 
 const getSocketUrl = async () => {
     const tchRand = Math.floor(100000 + Math.random() * 900000); // They're surely using 6 digit random number for ws url.

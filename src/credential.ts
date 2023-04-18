@@ -1,5 +1,5 @@
 import fetch from 'cross-fetch';
-import {readFileSync, writeFile} from "fs";
+import { readFileSync, writeFile } from "./_storage";
 
 const scrape = async () => {
     const _pb = await fetch("https://poe.com/login"),

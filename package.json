@@ -2,8 +2,7 @@
   "name": "poe-node",
   "version": "1.5.0",
   "description": "Work as CLI or module to call the Quora Poe API through GraphQL",
-  "main": "index.js",
-  "type": "module",
+  "main": "src/index.ts",
   "scripts": {
     "compile": "tsc",
     "dev": "npm run compile && node ./dist/cli.js",

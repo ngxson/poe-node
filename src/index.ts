@@ -1,30 +1,32 @@
 import fetch from "cross-fetch";
 import prompts from "prompts";
-import ora from "ora";
-import * as dotenv from "dotenv";
-import {readFileSync, writeFile, existsSync, statSync} from "fs";
-import {getUpdatedSettings, scrape} from "./credential.js";
-import {connectWs, disconnectWs, listenWs} from "./websocket.js";
-import * as mail from "./mail.js";
-import randomUseragent from 'random-useragent'
+//import ora from "ora";
+//import * as dotenv from "dotenv";
+import fs from "fs";
+import { getUpdatedSettings, scrape } from "./credential";
+import { connectWs, disconnectWs, listenWs } from "./websocket";
+import * as mail from "./mail";
+import randomUseragent from 'random-useragent';
+import { readFileSync, writeFile } from "./_storage";
 
-dotenv.config();
+// dotenv.config();
+// 
+// const spinner = ora({
+//     color: "cyan",
+// });
 
-const spinner = ora({
-    color: "cyan",
-});
-
-const gqlDir = process.cwd() + "/graphql";
+const gqlDir = __dirname + "../graphql";
 
 const queries = {
-    chatViewQuery: readFileSync(gqlDir + "/ChatViewQuery.graphql", "utf8"),
-    addMessageBreakMutation: readFileSync(gqlDir + "/AddMessageBreakMutation.graphql", "utf8"),
-    chatPaginationQuery: readFileSync(gqlDir + "/ChatPaginationQuery.graphql", "utf8"),
-    addHumanMessageMutation: readFileSync(gqlDir + "/AddHumanMessageMutation.graphql", "utf8"),
-    loginMutation: readFileSync(gqlDir + "/LoginWithVerificationCodeMutation.graphql", "utf8"),
-    signUpWithVerificationCodeMutation: readFileSync(gqlDir + "/SignupWithVerificationCodeMutation.graphql", "utf8"),
-    sendVerificationCodeMutation: readFileSync(gqlDir + "/SendVerificationCodeForLoginMutation.graphql", "utf8"),
+    chatViewQuery: fs.readFileSync(gqlDir + "/ChatViewQuery.graphql", "utf8"),
+    addMessageBreakMutation: fs.readFileSync(gqlDir + "/AddMessageBreakMutation.graphql", "utf8"),
+    chatPaginationQuery: fs.readFileSync(gqlDir + "/ChatPaginationQuery.graphql", "utf8"),
+    addHumanMessageMutation: fs.readFileSync(gqlDir + "/AddHumanMessageMutation.graphql", "utf8"),
+    loginMutation: fs.readFileSync(gqlDir + "/LoginWithVerificationCodeMutation.graphql", "utf8"),
+    signUpWithVerificationCodeMutation: fs.readFileSync(gqlDir + "/SignupWithVerificationCodeMutation.graphql", "utf8"),
+    sendVerificationCodeMutation: fs.readFileSync(gqlDir + "/SendVerificationCodeForLoginMutation.graphql", "utf8"),
 };
+
 
 class ChatBot {
     public config = JSON.parse(readFileSync("config.json", "utf8"));
@@ -137,9 +139,9 @@ class ChatBot {
         if (mode === "auto") {
             const {email, sid_token} = await mail.createNewEmail()
             const status = await this.sendVerifCode(null, email);
-            spinner.start("Waiting for OTP code...");
+            // spinner.start("Waiting for OTP code...");
             const otp_code = await mail.getPoeOTPCode(sid_token);
-            spinner.stop();
+            // spinner.stop();
             if (status === 'user_with_confirmed_email_not_found') {
                 await this.signUpWithVerificationCode(null, email, otp_code)
             } else {
@@ -179,7 +181,7 @@ class ChatBot {
                 message: "Enter your verification code:",
             });
 
-            spinner.start("Waiting for verification code...");
+            // spinner.start("Waiting for verification code...");
             let loginStatus = "invalid_verification_code";
             while (loginStatus !== "success") {
                 if (type === "email") {
@@ -196,7 +198,7 @@ class ChatBot {
                     }
                 }
             }
-            spinner.stop();
+            // spinner.stop();
         }
 
         await this.setChatIds();
@@ -432,9 +434,9 @@ class ChatBot {
             this.config.sid_token = sid_token;
         }
         const status = await this.sendVerifCode(null, this.config.email);
-        spinner.start("Waiting for OTP code...");
+        // spinner.start("Waiting for OTP code...");
         const otp_code = await mail.getPoeOTPCode(this.config.sid_token);
-        spinner.stop();
+        // spinner.stop();
         if (status === 'user_with_confirmed_email_not_found') {
             await this.signUpWithVerificationCode(null, this.config.email, otp_code)
         } else {
@@ -517,7 +519,7 @@ class ChatBot {
                 } else if (prompt === "!exit") {
                     process.exit(0);
                 } else if (prompt === "!clear") {
-                    spinner.start("Clearing chat history...");
+                    // spinner.start("Clearing chat history...");
                     await this.clearContext(bot);
                     if (this.config.stream_response) {
                         if (this.reConnectWs) {
@@ -529,7 +531,7 @@ class ChatBot {
                         }
                     }
                     submitedPrompt = "";
-                    spinner.stop();
+                    // spinner.stop();
                     console.log("Chat history cleared");
                 } else if (prompt === "!submit") {
                     if (submitedPrompt.length === 0) {
@@ -549,16 +551,16 @@ class ChatBot {
                         await listenWs(ws);
                         console.log('\n');
                     } else {
-                        spinner.start("Waiting for response...");
+                        // spinner.start("Waiting for response...");
                         let response = await this.getResponse(this.bot);
-                        spinner.stop();
+                        // spinner.stop();
                         console.log(response.data);
                     }
                     submitedPrompt = "";
                 } else if(prompt === "!history") {
-                    spinner.start("Loading history...")
+                    // spinner.start("Loading history...")
                     const msgs = await this.getHistory(this.bot)
-                    spinner.stop()
+                    // spinner.stop()
                     for(const { messageId, text, authorNickname } of msgs) {
                         console.log(
                           `${authorNickname === 'human' ? '\x1b[37m%s\x1b[0m' : '\x1b[32m%s\x1b[0m'}`,
@@ -566,7 +568,7 @@ class ChatBot {
                         )
                     }
                 } else if(prompt === "!file") {
-                    const { path } = await prompts({
+                    /*const { path } = await prompts({
                         type: "text",
                         name: "path",
                         message: "Full path",
@@ -580,11 +582,11 @@ class ChatBot {
                             return `${fp} is not a valid file path`
                         }
                     })
-                    submitedPrompt += readFileSync(path)
+                    submitedPrompt += readFileSync(path)*/
                 } else if(prompt === "!delete") {
-                    spinner.start("Loading history...")
+                    // spinner.start("Loading history...")
                     const msgs = await this.getHistory(this.bot)
-                    spinner.stop()
+                    // spinner.stop()
 
                     const { messageIds } = await prompts({
                         type: "multiselect",
@@ -596,9 +598,9 @@ class ChatBot {
                         }))
                     })
 
-                    spinner.start("Deleting messages")
+                    // spinner.start("Deleting messages")
                     await this.deleteMessages(messageIds)
-                    spinner.stop()
+                    // spinner.stop()
 
                 } else {
                     submitedPrompt += prompt + "\n";
