@@ -15,7 +15,7 @@ import { readFileSync, writeFile } from "./_storage";
 //     color: "cyan",
 // });
 
-const gqlDir = __dirname + "../graphql";
+const gqlDir = __dirname + "/../graphql";
 
 const queries = {
     chatViewQuery: fs.readFileSync(gqlDir + "/ChatViewQuery.graphql", "utf8"),
